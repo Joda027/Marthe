@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REM'S STORE — Lingerie, Bijoux &amp; Maquillage</title>
+<link rel="icon" id="favicon" type="image/jpeg" href="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="topbar">Livraison à Conakry &amp; envoi partout en Guinée — Commandes via WhatsApp</div>
+  <div class="nav-wrap">
+    <a href="#top" class="logo logo-brand">
+      <img id="logoImgHeader" class="logo-mark" alt="Rem's Store" src="">
+    </a>
+    <nav class="primary">
+      <a href="#top">Accueil</a>
+      <a href="#lingerie" data-cat-link="Lingerie">Lingerie</a>
+      <a href="#bijoux" data-cat-link="Bijoux">Bijoux</a>
+      <a href="#maquillage" data-cat-link="Maquillage">Maquillage</a>
+    </nav>
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="Rechercher un article…">
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" onclick="document.getElementById('produits').scrollIntoView({behavior:'smooth'})">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="icon-btn" onclick="openCart()">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-13z"/><path d="M6 6L5 2H2"/><circle cx="9.5" cy="20" r="1"/><circle cx="17.5" cy="20" r="1"/></svg>
+        Panier
+        <span class="badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <img id="logoImgHero" src="" alt="Rem's Store" style="width:74px; height:74px; border-radius:50%; margin:0 auto 22px; display:block;">
+    <div class="eyebrow">Rem's Store · Conakry</div>
+    <h1>La dentelle, l'éclat<br><em>&amp; le geste juste.</em></h1>
+    <p>Lingerie fine, bijoux et maquillage sélectionnés pour les femmes qui savent ce qu'elles veulent. Commandez en quelques clics, réglez et récupérez via WhatsApp.</p>
+    <div class="hero-ctas">
+      <a href="#produits" class="btn btn-gold">Voir la boutique</a>
+      <a href="https://wa.me/224000000000?text=Bonjour%20Rem's%20Store%2C%20je%20souhaite%20des%20renseignements." target="_blank" class="btn btn-outline-light">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.82L2 22l5.4-1.36a9.9 9.9 0 0 0 4.64 1.16h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2z"/></svg>
+        Écrire sur WhatsApp
+      </a>
+    </div>
+  </div>
+  <div class="lace-divider on-dark" style="position:absolute; bottom:0; left:0;"></div>
+</section>
+<div class="lace-divider on-ivory"></div>
+
+<section class="categories" id="categories">
+  <div class="section-head">
+    <div class="eyebrow">Nos univers</div>
+    <h2>Trois collections, un même raffinement</h2>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card" data-cat="Lingerie" id="card-Lingerie">
+      <div class="cat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3c-3 0-5 2-5 5v2l-3 9c3 2 12 2 16 0l-3-9V8c0-3-2-5-5-5z"/><path d="M9 8c1 1 5 1 6 0"/></svg>
+      </div>
+      <h3>Lingerie</h3>
+      <p>Nuisettes, ensembles et body-suits en dentelle, pour un intérieur qui vous ressemble.</p>
+      <span class="count">5 articles</span>
+    </div>
+    <div class="cat-card" data-cat="Bijoux" id="card-Bijoux">
+      <div class="cat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/></svg>
+      </div>
+      <h3>Bijoux</h3>
+      <p>Ensembles 3 pièces et montres-bracelets, pour sublimer chaque tenue.</p>
+      <span class="count">2 articles</span>
+    </div>
+    <div class="cat-card" data-cat="Maquillage" id="card-Maquillage">
+      <div class="cat-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 2h6v5l3 3v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-9l3-3z"/><line x1="6" y1="14" x2="18" y2="14"/></svg>
+      </div>
+      <h3>Maquillage</h3>
+      <p>Contours, correcteurs et pommades à sourcils pour un teint impeccable.</p>
+      <span class="count">3 articles</span>
+    </div>
+  </div>
+</section>
+
+<section class="products" id="produits">
+  <div class="section-head">
+    <div class="eyebrow">Boutique</div>
+    <h2>Tous nos articles</h2>
+  </div>
+  <div class="products-toolbar">
+    <div class="chip-row" id="chipRow">
+      <div class="chip active" data-filter="Tout">Tout</div>
+      <div class="chip" data-filter="Lingerie">Lingerie</div>
+      <div class="chip" data-filter="Bijoux">Bijoux</div>
+      <div class="chip" data-filter="Maquillage">Maquillage</div>
+    </div>
+    <div class="count-label" id="countLabel">10 articles</div>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</section>
+
+<section class="promo">
+  <div class="eyebrow" style="color:var(--gold-soft);">À savoir</div>
+  <h2>Commande en toute discrétion</h2>
+  <p>Chaque commande est emballée simplement et livrée avec discrétion à Conakry. Pour les autres villes, envoi possible via nos partenaires transport.</p>
+  <a href="https://wa.me/224000000000" target="_blank" class="btn btn-whatsapp">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.82L2 22l5.4-1.36a9.9 9.9 0 0 0 4.64 1.16h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2z"/></svg>
+    Commander maintenant
+  </a>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a href="#top" class="logo logo-brand">
+        <img id="logoImgFooter" class="logo-mark" alt="Rem's Store" src="">
+      </a>
+      <p class="tagline">Boutique en ligne de lingerie, bijoux et maquillage. Basée à Conakry, livrée avec soin.</p>
+    </div>
+    <div>
+      <h5>Boutique</h5>
+      <ul>
+        <li><a href="#lingerie" data-cat-link="Lingerie">Lingerie</a></li>
+        <li><a href="#bijoux" data-cat-link="Bijoux">Bijoux</a></li>
+        <li><a href="#maquillage" data-cat-link="Maquillage">Maquillage</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Infos</h5>
+      <ul>
+        <li><a href="#">Livraison</a></li>
+        <li><a href="#">Retours</a></li>
+        <li><a href="#">Guide des tailles</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="https://wa.me/224000000000" target="_blank">WhatsApp : +224 00 000 00 00</a></li>
+        <li><a href="#">Instagram</a></li>
+        <li>Conakry, Guinée</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Rem's Store. Tous droits réservés.</span>
+    <button class="pro-link" onclick="openLogin()">Espace pro (admin &amp; équipe)</button>
+  </div>
+</footer>
+
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Votre panier</h3>
+    <button class="drawer-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="drawer-items" id="drawerItems"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Total</span><strong id="cartTotal">0 GNF</strong></div>
+    <a class="btn btn-whatsapp btn-full" id="checkoutBtn" target="_blank">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.82L2 22l5.4-1.36a9.9 9.9 0 0 0 4.64 1.16h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2z"/></svg>
+      Finaliser sur WhatsApp
+    </a>
+  </div>
+</div>
+
+<!-- ================= LOGIN MODAL ================= -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLogin()">✕</button>
+    <h3>Espace pro</h3>
+    <p class="sub">Réservé à l'administrateur et aux collaborateurs de Rem's Store.</p>
+    <div class="form-error" id="loginError">Identifiants incorrects. Réessayez.</div>
+    <div class="field">
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="loginUser" placeholder="ex. admin" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Mot de passe</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-wine btn-full" onclick="attemptLogin()">Se connecter</button>
+    <p class="form-hint">Accès démo : <strong>admin</strong> / <strong>RemsAdmin2026</strong> — à changer avant mise en ligne réelle.</p>
+  </div>
+</div>
+
+<!-- ================= ADMIN DASHBOARD ================= -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-topbar">
+    <div class="logo-brand">
+      <img src="" id="logoImgAdmin" style="width:34px;height:34px;border-radius:50%;" alt="Rem's Store">
+      <strong style="font-family:'Cormorant Garamond',serif; font-size:1.2rem;">Espace pro</strong>
+    </div>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <span class="who">Connecté(e) : <strong id="whoName"></strong> <span id="whoRole"></span></span>
+      <button class="btn btn-outline-light btn-sm" onclick="closeAdmin()">Retour boutique</button>
+      <button class="btn btn-sm" style="background:var(--wine); color:#fff;" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-sidebar" id="adminSidebar">
+      <button class="admin-nav-item active" data-panel="dashboard">Tableau de bord</button>
+      <button class="admin-nav-item" data-panel="produits">Produits</button>
+      <button class="admin-nav-item" data-panel="promotions">Promotions</button>
+      <button class="admin-nav-item admin-only" data-panel="equipe">Équipe</button>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-panel active" id="panel-dashboard">
+        <h2>Tableau de bord</h2>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="label">Chiffre d'affaires</div><div class="value" id="statRevenue">0 GNF</div></div>
+          <div class="stat-card"><div class="label">Commandes totales</div><div class="value" id="statOrders">0</div></div>
+          <div class="stat-card"><div class="label">Panier moyen</div><div class="value" id="statAvg">0 GNF</div></div>
+          <div class="stat-card"><div class="label">Article le + vendu</div><div class="value" id="statTop" style="font-size:1.05rem;">—</div></div>
+        </div>
+        <div class="chart-box">
+          <h4>Commandes de la semaine (Lun → Dim)</h4>
+          <div class="bar-chart" id="weeklyChart"></div>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-produits">
+        <h2>Produits</h2>
+        <div class="locked-note" id="produitsNote"></div>
+        <div class="add-product-box">
+          <h4 id="productFormTitle">Ajouter un article</h4>
+          <div class="form-grid">
+            <div class="field"><label>Nom de l'article</label><input type="text" id="pName"></div>
+            <div class="field"><label>Catégorie</label>
+              <select id="pCat">
+                <option value="Lingerie">Lingerie</option>
+                <option value="Bijoux">Bijoux</option>
+                <option value="Maquillage">Maquillage</option>
+              </select>
+            </div>
+            <div class="field"><label>Prix (GNF)</label><input type="number" id="pPrice" min="0" step="1000"></div>
+            <div class="field"><label>Icône</label>
+              <select id="pIcon"></select>
+            </div>
+            <div class="field full"><label>Description courte</label><textarea id="pDesc"></textarea></div>
+          </div>
+          <div class="field">
+            <label>Couleurs disponibles</label>
+            <div class="color-input-row">
+              <input type="color" id="pColorHex" value="#9C2B41">
+              <input type="text" id="pColorName" placeholder="Nom de la couleur, ex. Rouge">
+              <button class="btn btn-outline btn-sm" onclick="addColorChip()">Ajouter</button>
+            </div>
+            <div class="chip-list" id="colorChipList"></div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-wine" onclick="submitProductForm()" id="productSubmitBtn">Ajouter l'article</button>
+            <button class="btn btn-outline" onclick="resetProductForm()" id="productCancelBtn" style="display:none;">Annuler</button>
+          </div>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Article</th><th>Catégorie</th><th>Prix</th><th>Couleurs</th><th>Ajouté par</th><th></th></tr></thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="admin-panel" id="panel-promotions">
+        <h2>Promotions</h2>
+        <div class="promo-box">
+          <div class="toggle-row">
+            <div>
+              <div style="font-weight:500;">Activer une promotion</div>
+              <div style="font-size:0.8rem; color:rgba(58,37,48,0.55);">Applique une réduction sur la boutique</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="promoEnabled"><span class="slider-toggle"></span></label>
+          </div>
+          <div class="field"><label>Libellé (affiché aux clientes)</label><input type="text" id="promoLabel" placeholder="ex. Promo de la semaine"></div>
+          <div class="form-grid">
+            <div class="field"><label>Réduction (%)</label><input type="number" id="promoPercent" min="1" max="90" value="10"></div>
+            <div class="field"><label>S'applique à</label>
+              <select id="promoScope">
+                <option value="Tout">Toute la boutique</option>
+                <option value="Lingerie">Lingerie</option>
+                <option value="Bijoux">Bijoux</option>
+                <option value="Maquillage">Maquillage</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-wine" onclick="savePromo()">Enregistrer la promotion</button>
+          <div class="promo-preview" id="promoPreview"></div>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-equipe">
+        <h2>Équipe</h2>
+        <div class="add-product-box">
+          <h4>Ajouter un collaborateur</h4>
+          <div class="form-grid">
+            <div class="field"><label>Nom complet</label><input type="text" id="tName"></div>
+            <div class="field"><label>Nom d'utilisateur</label><input type="text" id="tUser"></div>
+            <div class="field full"><label>Mot de passe personnel</label><input type="password" id="tPass"></div>
+          </div>
+          <div class="form-error" id="teamError">Ce nom d'utilisateur existe déjà.</div>
+          <button class="btn btn-wine" onclick="addCollaborator()">Ajouter le collaborateur</button>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Nom</th><th>Utilisateur</th><th>Rôle</th><th></th></tr></thead>
+          <tbody id="teamTableBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
