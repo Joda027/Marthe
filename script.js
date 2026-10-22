@@ -1,9 +1,3 @@
-/* ---------------- logo ---------------- */
-const LOGO_DATA = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDgiIGZpbGw9IiMxRTEwMTciIHN0cm9rZT0iI0M2QTI0RCIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M2QTI0RCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBvcGFjaXR5PSIwLjYiLz4KPHRleHQgeD0iNTAiIHk9IjYzIiBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiBmb250LXNpemU9IjM0IiBmb250LXN0eWxlPSJpdGFsaWMiIGZvbnQtd2VpZ2h0PSI2MDAiIGZpbGw9IiNERkM5OEMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlJTPC90ZXh0Pgo8L3N2Zz4K";
-document.getElementById('favicon').href = LOGO_DATA;
-document.getElementById('logoImgHeader').src = LOGO_DATA;
-document.getElementById('logoImgFooter').src = LOGO_DATA;
-document.getElementById('logoImgHero').src = LOGO_DATA;
 
 /* ---------------- data ---------------- */
 const WHATSAPP_NUMBER = "224000000000"; // TODO: remplacer par le vrai numéro Rem's Store
@@ -311,7 +305,6 @@ function logout(){
 function openAdmin(){
   if(!currentUser) return;
   document.getElementById('adminOverlay').classList.add('show');
-  document.getElementById('logoImgAdmin').src = LOGO_DATA;
   document.getElementById('whoName').textContent = currentUser.name;
   document.getElementById('whoRole').textContent = currentUser.role === 'admin' ? '(Administrateur)' : '(Collaborateur)';
   document.querySelectorAll('.admin-only').forEach(el=>{
