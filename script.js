@@ -24,7 +24,7 @@ const catMedia = {Lingerie:"media-lingerie", Bijoux:"media-bijoux", Maquillage:"
 
 let productSeq = 10;
 const products = [
-  {id:1, name:"Robe nuisette en dentelle", cat:"Lingerie", price:150000, desc:"Nuisette longue en dentelle fine, doublure satinée.", iconKey:"nuisette", media:"media-lingerie", addedBy:"Rem's Store",
+  {id:1, name:"Robe nuisette en dentelle", cat:"Lingerie", price:150000, desc:"Nuisette longue en dentelle fine, doublure satinée.", iconKey:"nuisette", media:"media-lingerie", addedBy:"Rem's Store", isNew:true,
     colors:[{name:"Rouge",hex:"#9C2B41"},{name:"Noir",hex:"#1E1017"},{name:"Beige",hex:"#D9B99B"}]},
   {id:2, name:"Ensemble soutien-gorge & slip en dentelle", cat:"Lingerie", price:120000, desc:"Parure assortie en dentelle brodée, plusieurs tailles.", iconKey:"ensemble", media:"media-lingerie", addedBy:"Rem's Store",
     colors:[{name:"Noir",hex:"#1E1017"},{name:"Bordeaux",hex:"#7A1F31"}]},
@@ -33,11 +33,11 @@ const products = [
   {id:4, name:"Slips en dentelle (lot de 3)", cat:"Lingerie", price:40000, desc:"Lot de 3 slips assortis, coloris variés.", iconKey:"slip", media:"media-lingerie", addedBy:"Rem's Store", colors:[]},
   {id:5, name:"Menottes accessoire", cat:"Lingerie", price:60000, desc:"Accessoire satiné, finition doublée.", iconKey:"menotte", media:"media-lingerie", addedBy:"Rem's Store",
     colors:[{name:"Noir",hex:"#1E1017"},{name:"Rouge",hex:"#9C2B41"}]},
-  {id:6, name:"Ensemble 3 pièces", cat:"Bijoux", price:90000, desc:"Collier, bracelet et boucles d'oreilles assortis.", iconKey:"bijoux3", media:"media-bijoux", addedBy:"Rem's Store",
+  {id:6, name:"Ensemble 3 pièces", cat:"Bijoux", price:90000, desc:"Collier, bracelet et boucles d'oreilles assortis.", iconKey:"bijoux3", media:"media-bijoux", addedBy:"Rem's Store", isNew:true,
     colors:[{name:"Doré",hex:"#C6A24D"},{name:"Argenté",hex:"#C6C6C6"}]},
   {id:7, name:"Ensemble montre-bracelet", cat:"Bijoux", price:150000, desc:"Montre et bracelet dorés, coffret inclus.", iconKey:"montre", media:"media-bijoux", addedBy:"Rem's Store",
     colors:[{name:"Doré",hex:"#C6A24D"},{name:"Argenté",hex:"#C6C6C6"},{name:"Noir",hex:"#1E1017"}]},
-  {id:8, name:"Contour visage", cat:"Maquillage", price:70000, desc:"Palette de contouring, longue tenue.", iconKey:"contour", media:"media-maquillage", addedBy:"Rem's Store",
+  {id:8, name:"Contour visage", cat:"Maquillage", price:70000, desc:"Palette de contouring, longue tenue.", iconKey:"contour", media:"media-maquillage", addedBy:"Rem's Store", isNew:true,
     colors:[{name:"Clair",hex:"#E8C9A0"},{name:"Médium",hex:"#C68642"},{name:"Foncé",hex:"#8D5524"}]},
   {id:9, name:"Concealer anti-cernes", cat:"Maquillage", price:45000, desc:"Correcteur haute couvrance, fini naturel.", iconKey:"concealer", media:"media-maquillage", addedBy:"Rem's Store",
     colors:[{name:"Clair",hex:"#E8C9A0"},{name:"Médium",hex:"#C68642"},{name:"Foncé",hex:"#8D5524"}]},
@@ -48,6 +48,7 @@ const products = [
 let activeFilter = "Tout";
 let searchTerm = "";
 let selectedColor = {}; // productId -> color name
+let wishlist = new Set(); // productId
 
 const fmt = n => Math.round(n).toLocaleString('fr-FR') + " GNF";
 
@@ -87,7 +88,9 @@ let orders = []; // {date: Date, total: number, items:[{name, qty}]}
 function renderGrid(){
   const grid = document.getElementById('productGrid');
   const filtered = products.filter(p=>{
-    const matchCat = activeFilter === "Tout" || p.cat === activeFilter;
+    const matchCat = activeFilter === "Tout" ? true
+      : activeFilter === "Promo" ? applyPromo(p).hasPromo
+      : p.cat === activeFilter;
     const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchCat && matchSearch;
   });
@@ -100,10 +103,14 @@ function renderGrid(){
         ${p.colors.map(c => `<span class="swatch ${c.name===curColor?'active':''}" style="background:${c.hex}" data-id="${p.id}" data-color="${c.name}" title="${c.name}"></span>`).join('')}
         <span class="swatch-label">${curColor||''}</span>
       </div>` : '';
+    const wished = wishlist.has(p.id);
     return `
     <div class="card">
       <div class="card-media ${p.media}">
-        <span class="tag-onmedia">${p.cat}</span>
+        ${hasPromo ? `<span class="corner-badge corner-promo">Promo</span>` : (p.isNew ? `<span class="corner-badge corner-new">Nouveau</span>` : '')}
+        <button class="wish-btn ${wished?'active':''}" data-wish="${p.id}" aria-label="Ajouter aux favoris">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="${wished?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.1C.5 8.4 2.3 5 5.8 5c2 0 3.4 1 6.2 4 2.8-3 4.2-4 6.2-4 3.5 0 5.3 3.4 3.8 6.9C19.5 16.4 12 21 12 21z"/></svg>
+        </button>
         ${icons[p.iconKey] || icons.autre}
       </div>
       <div class="card-body">
@@ -114,7 +121,6 @@ function renderGrid(){
           <span class="price">
             ${hasPromo ? `<span class="price-old">${p.price.toLocaleString('fr-FR')}</span>`:''}
             ${finalPrice.toLocaleString('fr-FR')}<span class="cur">GNF</span>
-            ${hasPromo ? `<span class="promo-tag">${promo.label}</span>`:''}
           </span>
         </div>
         <div class="card-actions">
@@ -132,6 +138,13 @@ document.getElementById('productGrid').addEventListener('click', e=>{
   const sw = e.target.closest('.swatch');
   if(sw){
     selectedColor[sw.dataset.id] = sw.dataset.color;
+    renderGrid();
+    return;
+  }
+  const wishBtn = e.target.closest('[data-wish]');
+  if(wishBtn){
+    const id = Number(wishBtn.dataset.wish);
+    if(wishlist.has(id)) wishlist.delete(id); else wishlist.add(id);
     renderGrid();
     return;
   }
