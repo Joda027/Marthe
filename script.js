@@ -9,7 +9,7 @@ if(!window.supabase){
   });
   throw new Error("Supabase JS n'a pas pu se charger (CDN injoignable ou bloqué).");
 }
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ---------------- data ---------------- */
 const WHATSAPP_NUMBER = "224000000000"; // TODO: remplacer par le vrai numéro Rem's Store
@@ -37,7 +37,7 @@ const catMedia = {Lingerie:"media-lingerie", Bijoux:"media-bijoux", Maquillage:"
 let products = []; // loaded from Supabase
 
 async function loadProducts(){
-  const { data, error } = await supabase.from('products').select('*').order('id');
+  const { data, error } = await supabaseClient.from('products').select('*').order('id');
   if(error){ console.error('loadProducts', error); showToast("Erreur de chargement des produits"); return; }
   products = data.map(p => ({
     id: p.id, name: p.name, cat: p.cat, price: p.price, desc: p.description || '',
@@ -57,7 +57,7 @@ const fmt = n => Math.round(n).toLocaleString('fr-FR') + " GNF";
 let promo = { enabled:false, label:"Promo de la semaine", percent:10, scope:"Tout" };
 
 async function loadPromo(){
-  const { data, error } = await supabase.from('promotions').select('*').eq('id', 1).single();
+  const { data, error } = await supabaseClient.from('promotions').select('*').eq('id', 1).single();
   if(error){ console.error('loadPromo', error); return; }
   promo = { enabled: data.enabled, label: data.label, percent: data.percent, scope: data.scope };
 }
@@ -74,7 +74,7 @@ let currentUser = null; // {id, role, name}
 
 async function setCurrentUserFromSession(session){
   if(!session){ currentUser = null; return; }
-  const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+  const { data: profile, error } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
   if(error || !profile){
     currentUser = { id: session.user.id, role: 'collaborateur', name: session.user.email };
   } else {
@@ -86,7 +86,7 @@ async function setCurrentUserFromSession(session){
 let orders = []; // {date: Date, total: number, items:[{name, qty}]}
 
 async function loadOrders(){
-  const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending:false }).limit(500);
+  const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending:false }).limit(500);
   if(error){ console.error('loadOrders', error); return; }
   orders = data.map(o => ({ date: new Date(o.created_at), total: o.total, items: o.items || [] }));
 }
@@ -274,7 +274,7 @@ document.getElementById('checkoutBtn').addEventListener('click', async e=>{
     updateCartUI();
     closeCart();
     showToast("Commande envoyée sur WhatsApp");
-    const { error } = await supabase.from('orders').insert({ total, items });
+    const { error } = await supabaseClient.from('orders').insert({ total, items });
     if(error) console.error('order insert failed', error);
   }
 });
@@ -313,7 +313,7 @@ function closeLogin(){
 async function attemptLogin(){
   const email = document.getElementById('loginUser').value.trim();
   const password = document.getElementById('loginPass').value;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if(error || !data.session){
     document.getElementById('loginError').classList.add('show');
     return;
@@ -323,7 +323,7 @@ async function attemptLogin(){
   openAdmin();
 }
 async function logout(){
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   currentUser = null;
   closeAdmin();
 }
@@ -445,12 +445,12 @@ async function submitProductForm(){
 
   if(editingProductId){
     if(currentUser.role !== 'admin'){ showToast("Seul l'administrateur peut modifier un article"); return; }
-    const { error } = await supabase.from('products').update({
+    const { error } = await supabaseClient.from('products').update({
       name, cat, price, icon_key: iconKey, description: desc, colors: chipColors
     }).eq('id', editingProductId);
     if(error){ console.error(error); showToast("Erreur lors de la modification"); return; }
   } else {
-    const { error } = await supabase.from('products').insert({
+    const { error } = await supabaseClient.from('products').insert({
       name, cat, price, icon_key: iconKey, description: desc, colors: chipColors,
       added_by: currentUser.name, is_new: false
     });
@@ -487,7 +487,7 @@ async function deleteProduct(id){
   const p = products.find(p=>p.id===id);
   if(!p) return;
   if(!confirm(`Retirer "${p.name}" de la boutique ?`)) return;
-  const { error } = await supabase.from('products').delete().eq('id', id);
+  const { error } = await supabaseClient.from('products').delete().eq('id', id);
   if(error){ console.error(error); showToast("Erreur lors de la suppression"); return; }
   await loadProducts();
   renderProductsAdmin();
@@ -542,7 +542,7 @@ async function savePromo(){
   const label = document.getElementById('promoLabel').value.trim() || 'Promotion';
   const percent = Math.min(90, Math.max(1, Number(document.getElementById('promoPercent').value) || 10));
   const scope = document.getElementById('promoScope').value;
-  const { error } = await supabase.from('promotions').update({ enabled, label, percent, scope }).eq('id', 1);
+  const { error } = await supabaseClient.from('promotions').update({ enabled, label, percent, scope }).eq('id', 1);
   if(error){ console.error(error); showToast("Erreur lors de l'enregistrement"); return; }
   promo = { enabled, label, percent, scope };
   updatePromoPreview();
@@ -553,7 +553,7 @@ async function savePromo(){
 /* ---- team (admin only, read-only — accounts managed in Supabase) ---- */
 let teamProfiles = [];
 async function loadTeam(){
-  const { data, error } = await supabase.from('profiles').select('*').order('role', { ascending:false });
+  const { data, error } = await supabaseClient.from('profiles').select('*').order('role', { ascending:false });
   if(error){ console.error('loadTeam', error); return; }
   teamProfiles = data;
 }
@@ -573,7 +573,7 @@ async function init(){
   renderGrid();
   updateCartUI();
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if(session) await setCurrentUserFromSession(session);
 }
 init();
