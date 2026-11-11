@@ -2,6 +2,13 @@
 /* ---------------- Supabase ---------------- */
 const SUPABASE_URL = "https://zcuxxoeiflpyrmlhwxlb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_kMRsQDrsw775x-97u1Zs9w_d_dsAA07";
+if(!window.supabase){
+  document.addEventListener('DOMContentLoaded', () => {
+    const t = document.getElementById('toast');
+    if(t){ t.textContent = "Erreur de connexion au serveur. Rechargez la page."; t.classList.add('show'); }
+  });
+  throw new Error("Supabase JS n'a pas pu se charger (CDN injoignable ou bloqué).");
+}
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ---------------- data ---------------- */
