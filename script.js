@@ -1,4 +1,9 @@
 
+/* ---------------- Supabase ---------------- */
+const SUPABASE_URL = "https://zcuxxoeiflpyrmlhwxlb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_kMRsQDrsw775x-97u1Zs9w_d_dsAA07";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 /* ---------------- data ---------------- */
 const WHATSAPP_NUMBER = "224000000000"; // TODO: remplacer par le vrai numéro Rem's Store
 
@@ -22,28 +27,17 @@ const iconLabels = {
 };
 const catMedia = {Lingerie:"media-lingerie", Bijoux:"media-bijoux", Maquillage:"media-maquillage"};
 
-let productSeq = 10;
-const products = [
-  {id:1, name:"Robe nuisette en dentelle", cat:"Lingerie", price:150000, desc:"Nuisette longue en dentelle fine, doublure satinée.", iconKey:"nuisette", media:"media-lingerie", addedBy:"Rem's Store", isNew:true,
-    colors:[{name:"Rouge",hex:"#9C2B41"},{name:"Noir",hex:"#1E1017"},{name:"Beige",hex:"#D9B99B"}]},
-  {id:2, name:"Ensemble soutien-gorge & slip en dentelle", cat:"Lingerie", price:120000, desc:"Parure assortie en dentelle brodée, plusieurs tailles.", iconKey:"ensemble", media:"media-lingerie", addedBy:"Rem's Store",
-    colors:[{name:"Noir",hex:"#1E1017"},{name:"Bordeaux",hex:"#7A1F31"}]},
-  {id:3, name:"Body-suit en dentelle", cat:"Lingerie", price:130000, desc:"Body une pièce, dentelle extensible et confortable.", iconKey:"body", media:"media-lingerie", addedBy:"Rem's Store",
-    colors:[{name:"Noir",hex:"#1E1017"},{name:"Blanc",hex:"#F3E9E2"}]},
-  {id:4, name:"Slips en dentelle (lot de 3)", cat:"Lingerie", price:40000, desc:"Lot de 3 slips assortis, coloris variés.", iconKey:"slip", media:"media-lingerie", addedBy:"Rem's Store", colors:[]},
-  {id:5, name:"Menottes accessoire", cat:"Lingerie", price:60000, desc:"Accessoire satiné, finition doublée.", iconKey:"menotte", media:"media-lingerie", addedBy:"Rem's Store",
-    colors:[{name:"Noir",hex:"#1E1017"},{name:"Rouge",hex:"#9C2B41"}]},
-  {id:6, name:"Ensemble 3 pièces", cat:"Bijoux", price:90000, desc:"Collier, bracelet et boucles d'oreilles assortis.", iconKey:"bijoux3", media:"media-bijoux", addedBy:"Rem's Store", isNew:true,
-    colors:[{name:"Doré",hex:"#C6A24D"},{name:"Argenté",hex:"#C6C6C6"}]},
-  {id:7, name:"Ensemble montre-bracelet", cat:"Bijoux", price:150000, desc:"Montre et bracelet dorés, coffret inclus.", iconKey:"montre", media:"media-bijoux", addedBy:"Rem's Store",
-    colors:[{name:"Doré",hex:"#C6A24D"},{name:"Argenté",hex:"#C6C6C6"},{name:"Noir",hex:"#1E1017"}]},
-  {id:8, name:"Contour visage", cat:"Maquillage", price:70000, desc:"Palette de contouring, longue tenue.", iconKey:"contour", media:"media-maquillage", addedBy:"Rem's Store", isNew:true,
-    colors:[{name:"Clair",hex:"#E8C9A0"},{name:"Médium",hex:"#C68642"},{name:"Foncé",hex:"#8D5524"}]},
-  {id:9, name:"Concealer anti-cernes", cat:"Maquillage", price:45000, desc:"Correcteur haute couvrance, fini naturel.", iconKey:"concealer", media:"media-maquillage", addedBy:"Rem's Store",
-    colors:[{name:"Clair",hex:"#E8C9A0"},{name:"Médium",hex:"#C68642"},{name:"Foncé",hex:"#8D5524"}]},
-  {id:10, name:"Pommade à sourcils", cat:"Maquillage", price:35000, desc:"Tenue longue durée, application précise.", iconKey:"sourcil", media:"media-maquillage", addedBy:"Rem's Store",
-    colors:[{name:"Blond",hex:"#C9A227"},{name:"Brun",hex:"#6B4226"},{name:"Noir",hex:"#1E1017"}]},
-];
+let products = []; // loaded from Supabase
+
+async function loadProducts(){
+  const { data, error } = await supabase.from('products').select('*').order('id');
+  if(error){ console.error('loadProducts', error); showToast("Erreur de chargement des produits"); return; }
+  products = data.map(p => ({
+    id: p.id, name: p.name, cat: p.cat, price: p.price, desc: p.description || '',
+    iconKey: p.icon_key, media: catMedia[p.cat] || 'media-lingerie', addedBy: p.added_by,
+    isNew: p.is_new, colors: p.colors || []
+  }));
+}
 
 let activeFilter = "Tout";
 let searchTerm = "";
@@ -55,6 +49,12 @@ const fmt = n => Math.round(n).toLocaleString('fr-FR') + " GNF";
 /* ---------------- promotions ---------------- */
 let promo = { enabled:false, label:"Promo de la semaine", percent:10, scope:"Tout" };
 
+async function loadPromo(){
+  const { data, error } = await supabase.from('promotions').select('*').eq('id', 1).single();
+  if(error){ console.error('loadPromo', error); return; }
+  promo = { enabled: data.enabled, label: data.label, percent: data.percent, scope: data.scope };
+}
+
 function applyPromo(product){
   if(!promo.enabled) return { finalPrice:product.price, hasPromo:false };
   if(promo.scope !== "Tout" && promo.scope !== product.cat) return { finalPrice:product.price, hasPromo:false };
@@ -63,26 +63,26 @@ function applyPromo(product){
 }
 
 /* ---------------- users & auth ---------------- */
-let users = {
-  admin: { password:"RemsAdmin2026", role:"admin", name:"Administrateur" }
-};
-let currentUser = null; // {username, role, name}
+let currentUser = null; // {id, role, name}
+
+async function setCurrentUserFromSession(session){
+  if(!session){ currentUser = null; return; }
+  const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+  if(error || !profile){
+    currentUser = { id: session.user.id, role: 'collaborateur', name: session.user.email };
+  } else {
+    currentUser = { id: session.user.id, role: profile.role, name: profile.name };
+  }
+}
 
 /* ---------------- orders (for stats) ---------------- */
 let orders = []; // {date: Date, total: number, items:[{name, qty}]}
-(function seedOrders(){
-  const topSellers = [products[0], products[1], products[7], products[5]];
-  for(let d = 6; d >= 1; d--){
-    const date = new Date();
-    date.setDate(date.getDate() - d);
-    const count = Math.floor(Math.random()*3); // 0-2 orders that day
-    for(let i=0;i<count;i++){
-      const p = topSellers[Math.floor(Math.random()*topSellers.length)];
-      const qty = 1 + Math.floor(Math.random()*2);
-      orders.push({ date:new Date(date), total:p.price*qty, items:[{name:p.name, qty}] });
-    }
-  }
-})();
+
+async function loadOrders(){
+  const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending:false }).limit(500);
+  if(error){ console.error('loadOrders', error); return; }
+  orders = data.map(o => ({ date: new Date(o.created_at), total: o.total, items: o.items || [] }));
+}
 
 /* ================= PRODUCT GRID (boutique) ================= */
 function renderGrid(){
@@ -252,7 +252,7 @@ document.getElementById('drawerItems').addEventListener('click', e=>{
   if(rm){ removeItem(rm.dataset.remove); }
 });
 
-document.getElementById('checkoutBtn').addEventListener('click', e=>{
+document.getElementById('checkoutBtn').addEventListener('click', async e=>{
   e.preventDefault();
   const entries = Object.values(cart);
   const msgLines = entries.map(it => `• ${it.name}${it.color?' - '+it.color:''} x${it.qty} — ${fmt(it.unitPrice*it.qty)}`);
@@ -261,11 +261,14 @@ document.getElementById('checkoutBtn').addEventListener('click', e=>{
     : `Bonjour Rem's Store, je souhaite passer commande.`;
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
   if(entries.length){
-    orders.push({ date:new Date(), total:cartTotal(), items: entries.map(it=>({name:it.name, qty:it.qty})) });
+    const total = cartTotal();
+    const items = entries.map(it=>({name:it.name, qty:it.qty}));
     cart = {};
     updateCartUI();
     closeCart();
     showToast("Commande envoyée sur WhatsApp");
+    const { error } = await supabase.from('orders').insert({ total, items });
+    if(error) console.error('order insert failed', error);
   }
 });
 
@@ -288,6 +291,9 @@ function showToast(text){
 }
 
 /* ================= LOGIN ================= */
+function openTeamSpace(){
+  if(currentUser) openAdmin(); else openLogin();
+}
 function openLogin(){
   document.getElementById('loginModal').classList.add('show');
   document.getElementById('loginError').classList.remove('show');
@@ -297,25 +303,26 @@ function openLogin(){
 function closeLogin(){
   document.getElementById('loginModal').classList.remove('show');
 }
-function attemptLogin(){
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  const rec = users[u];
-  if(rec && rec.password === p){
-    currentUser = { username:u, role:rec.role, name:rec.name };
-    closeLogin();
-    openAdmin();
-  } else {
+async function attemptLogin(){
+  const email = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if(error || !data.session){
     document.getElementById('loginError').classList.add('show');
+    return;
   }
+  await setCurrentUserFromSession(data.session);
+  closeLogin();
+  openAdmin();
 }
-function logout(){
+async function logout(){
+  await supabase.auth.signOut();
   currentUser = null;
   closeAdmin();
 }
 
 /* ================= ADMIN DASHBOARD ================= */
-function openAdmin(){
+async function openAdmin(){
   if(!currentUser) return;
   document.getElementById('adminOverlay').classList.add('show');
   document.getElementById('whoName').textContent = currentUser.name;
@@ -323,7 +330,7 @@ function openAdmin(){
   document.querySelectorAll('.admin-only').forEach(el=>{
     el.style.display = currentUser.role === 'admin' ? '' : 'none';
   });
-  switchAdminPanel('dashboard');
+  await switchAdminPanel('dashboard');
 }
 function closeAdmin(){
   document.getElementById('adminOverlay').classList.remove('show');
@@ -332,14 +339,14 @@ document.getElementById('adminSidebar').addEventListener('click', e=>{
   const item = e.target.closest('.admin-nav-item');
   if(item) switchAdminPanel(item.dataset.panel);
 });
-function switchAdminPanel(name){
+async function switchAdminPanel(name){
   if(name === 'equipe' && currentUser.role !== 'admin') name = 'dashboard';
   document.querySelectorAll('.admin-nav-item').forEach(b=>b.classList.toggle('active', b.dataset.panel===name));
   document.querySelectorAll('.admin-panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
-  if(name==='dashboard') renderDashboard();
-  if(name==='produits') renderProductsAdmin();
+  if(name==='dashboard'){ await loadOrders(); renderDashboard(); }
+  if(name==='produits'){ await loadProducts(); renderProductsAdmin(); }
   if(name==='promotions') renderPromoForm();
-  if(name==='equipe') renderTeam();
+  if(name==='equipe'){ await loadTeam(); renderTeam(); }
 }
 
 /* ---- dashboard / stats ---- */
@@ -421,7 +428,7 @@ function resetProductForm(){
   document.getElementById('productCancelBtn').style.display = 'none';
 }
 
-function submitProductForm(){
+async function submitProductForm(){
   const name = document.getElementById('pName').value.trim();
   const cat = document.getElementById('pCat').value;
   const price = Number(document.getElementById('pPrice').value);
@@ -431,18 +438,23 @@ function submitProductForm(){
 
   if(editingProductId){
     if(currentUser.role !== 'admin'){ showToast("Seul l'administrateur peut modifier un article"); return; }
-    const p = products.find(p=>p.id===editingProductId);
-    Object.assign(p, { name, cat, price, iconKey, desc, media:catMedia[cat], colors:[...chipColors] });
+    const { error } = await supabase.from('products').update({
+      name, cat, price, icon_key: iconKey, description: desc, colors: chipColors
+    }).eq('id', editingProductId);
+    if(error){ console.error(error); showToast("Erreur lors de la modification"); return; }
   } else {
-    products.push({
-      id: ++productSeq, name, cat, price, desc, iconKey,
-      media: catMedia[cat], addedBy: currentUser.name, colors:[...chipColors]
+    const { error } = await supabase.from('products').insert({
+      name, cat, price, icon_key: iconKey, description: desc, colors: chipColors,
+      added_by: currentUser.name, is_new: false
     });
+    if(error){ console.error(error); showToast("Erreur lors de l'ajout"); return; }
   }
+  const wasEditing = !!editingProductId;
   resetProductForm();
+  await loadProducts();
   renderProductsAdmin();
   renderGrid();
-  showToast(editingProductId ? "Article modifié" : "Article ajouté");
+  showToast(wasEditing ? "Article modifié" : "Article ajouté");
 }
 
 function editProduct(id){
@@ -463,12 +475,14 @@ function editProduct(id){
   document.querySelector('.add-product-box').scrollIntoView({behavior:'smooth'});
 }
 
-function deleteProduct(id){
+async function deleteProduct(id){
   if(currentUser.role !== 'admin') return;
   const p = products.find(p=>p.id===id);
   if(!p) return;
   if(!confirm(`Retirer "${p.name}" de la boutique ?`)) return;
-  products.splice(products.findIndex(p=>p.id===id), 1);
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if(error){ console.error(error); showToast("Erreur lors de la suppression"); return; }
+  await loadProducts();
   renderProductsAdmin();
   renderGrid();
   showToast("Article retiré");
@@ -516,59 +530,43 @@ function updatePromoPreview(){
   const scopeText = promo.scope === 'Tout' ? 'toute la boutique' : `la catégorie ${promo.scope}`;
   el.textContent = `« ${promo.label} » — ${promo.percent}% de réduction sur ${scopeText}, visible immédiatement sur la boutique.`;
 }
-function savePromo(){
-  promo.enabled = document.getElementById('promoEnabled').checked;
-  promo.label = document.getElementById('promoLabel').value.trim() || 'Promotion';
-  promo.percent = Math.min(90, Math.max(1, Number(document.getElementById('promoPercent').value) || 10));
-  promo.scope = document.getElementById('promoScope').value;
+async function savePromo(){
+  const enabled = document.getElementById('promoEnabled').checked;
+  const label = document.getElementById('promoLabel').value.trim() || 'Promotion';
+  const percent = Math.min(90, Math.max(1, Number(document.getElementById('promoPercent').value) || 10));
+  const scope = document.getElementById('promoScope').value;
+  const { error } = await supabase.from('promotions').update({ enabled, label, percent, scope }).eq('id', 1);
+  if(error){ console.error(error); showToast("Erreur lors de l'enregistrement"); return; }
+  promo = { enabled, label, percent, scope };
   updatePromoPreview();
   renderGrid();
   showToast("Promotion enregistrée");
 }
 
-/* ---- team (admin only) ---- */
+/* ---- team (admin only, read-only — accounts managed in Supabase) ---- */
+let teamProfiles = [];
+async function loadTeam(){
+  const { data, error } = await supabase.from('profiles').select('*').order('role', { ascending:false });
+  if(error){ console.error('loadTeam', error); return; }
+  teamProfiles = data;
+}
 function renderTeam(){
-  document.getElementById('teamError').classList.remove('show');
-  document.getElementById('tName').value = '';
-  document.getElementById('tUser').value = '';
-  document.getElementById('tPass').value = '';
-  document.getElementById('teamTableBody').innerHTML = Object.entries(users).map(([username,rec])=>`
+  document.getElementById('teamTableBody').innerHTML = teamProfiles.map(p=>`
     <tr>
-      <td>${rec.name}</td>
-      <td>${username}</td>
-      <td><span class="role-pill ${rec.role==='admin'?'admin':''}">${rec.role==='admin'?'Admin':'Collaborateur'}</span></td>
-      <td>${rec.role!=='admin' ? `<button class="icon-action danger" data-del-team="${username}">Retirer</button>` : ''}</td>
+      <td>${p.name}</td>
+      <td><span class="role-pill ${p.role==='admin'?'admin':''}">${p.role==='admin'?'Admin':'Collaborateur'}</span></td>
     </tr>`).join('');
-}
-document.getElementById('teamTableBody').addEventListener('click', e=>{
-  const del = e.target.closest('[data-del-team]');
-  if(del){ deleteCollaborator(del.dataset.delTeam); }
-});
-
-function addCollaborator(){
-  const name = document.getElementById('tName').value.trim();
-  const username = document.getElementById('tUser').value.trim();
-  const pass = document.getElementById('tPass').value;
-  document.getElementById('teamError').classList.remove('show');
-  if(!name || !username || !pass){ showToast("Tous les champs sont requis"); return; }
-  if(users[username]){
-    document.getElementById('teamError').classList.add('show');
-    return;
-  }
-  users[username] = { password:pass, role:'collaborateur', name };
-  renderTeam();
-  showToast("Collaborateur ajouté");
-}
-
-function deleteCollaborator(username){
-  if(username === 'admin') return;
-  if(!confirm(`Retirer ${users[username].name} de l'équipe ?`)) return;
-  delete users[username];
-  renderTeam();
-  showToast("Collaborateur retiré");
 }
 
 /* ================= INIT ================= */
-resetProductForm();
-renderGrid();
-updateCartUI();
+async function init(){
+  resetProductForm();
+  await loadProducts();
+  await loadPromo();
+  renderGrid();
+  updateCartUI();
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if(session) await setCurrentUserFromSession(session);
+}
+init();
