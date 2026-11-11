@@ -537,6 +537,12 @@ function updatePromoPreview(){
   const scopeText = promo.scope === 'Tout' ? 'toute la boutique' : `la catégorie ${promo.scope}`;
   el.textContent = `« ${promo.label} » — ${promo.percent}% de réduction sur ${scopeText}, visible immédiatement sur la boutique.`;
 }
+function updateFloatingPromo(){
+  const badge = document.getElementById('floatingPromo');
+  if(!promo.enabled){ badge.style.display = 'none'; return; }
+  document.getElementById('floatingPromoText').textContent = `${promo.label} · -${promo.percent}%`;
+  badge.style.display = 'flex';
+}
 async function savePromo(){
   const enabled = document.getElementById('promoEnabled').checked;
   const label = document.getElementById('promoLabel').value.trim() || 'Promotion';
@@ -546,6 +552,7 @@ async function savePromo(){
   if(error){ console.error(error); showToast("Erreur lors de l'enregistrement"); return; }
   promo = { enabled, label, percent, scope };
   updatePromoPreview();
+  updateFloatingPromo();
   renderGrid();
   showToast("Promotion enregistrée");
 }
@@ -572,6 +579,7 @@ async function init(){
   await loadPromo();
   renderGrid();
   updateCartUI();
+  updateFloatingPromo();
 
   const { data: { session } } = await supabaseClient.auth.getSession();
   if(session) await setCurrentUserFromSession(session);
